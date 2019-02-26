@@ -1,0 +1,8 @@
+//
+// Created by jwkim98 on 19/02/19.
+//
+
+#ifndef CUBBYDNN_ARTHIMETIC_HPP
+#define CUBBYDNN_ARTHIMETIC_HPP
+
+#endif //CUBBYDNN_ARTHIMETIC_HPP
