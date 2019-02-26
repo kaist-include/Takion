@@ -4,3 +4,6 @@
 [submodule "Libraries/googlebenchmark"]
 	path = Libraries/googlebenchmark
 	url = https://github.com/google/benchmark.git
+[submodule "Libraries/universal"]
+	path = Libraries/universal
+	url = https://github.com/stillwater-sc/universal.git
