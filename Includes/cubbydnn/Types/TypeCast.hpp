@@ -6,13 +6,13 @@
 #define CUBBYDNN_TYPECAST_HPP
 
 #include <cstdio>
+#include <cstdint>
 #include "Endian.hpp"
-#include "bFloat16.hpp"
 namespace CubbyDNN
 {
-void FloatTobFloat16(const float* val, bFloat16* result, size_t count = 1);
+void TruncateFloatToBfloat16(const float* floatInput, uint16_t* Bfloat16Output, size_t count = 1);
 
-void bFloat16ToFloat(const bFloat16* val, float* result, size_t count = 1);
+void TruncateBfloat16ToFloat(const uint16_t* Bfloat16Input, float* floatOutput, size_t count = 1);
 }  // namespace CubbyDNN
 
 #endif  // CUBBYDNN_TYPECAST_HPP

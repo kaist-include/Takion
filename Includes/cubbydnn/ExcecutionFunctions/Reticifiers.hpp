@@ -7,7 +7,7 @@
 
 #include <cmath>
 #include <functional>
-#include "../Arthimetics/Arthimetic.hpp"
+#include "cubbydnn/Arthimetics/Arithmetic.hpp"
 
 namespace CubbyDNN
 {
@@ -15,9 +15,14 @@ template <typename T>
 class Relu
 {
  public:
-    T operator()(T input)
+    T Forward(T input)
     {
         return (input > 0) ? input : 0;
+    }
+
+    T Backward(T input)
+    {
+        return (input > 0) ? 1 : 0;
     }
 };
 
@@ -25,10 +30,15 @@ template <typename T>
 class SmoothRelu
 {
  public:
-    T operator()(T input)
+    T Forward(T input)
     {
         /// T should have conversion from double
-        return static_cast<T>(log(1 + (input)));
+        return CpuArithmetic::Log(1 + input);
+    }
+
+    T Backward(T input)
+    {
+        return 1/Log(1+input);
     }
 };
 
@@ -40,9 +50,14 @@ class LeakyRelu
     {
     }
 
-    T operator()(T input)
+    T Forward(T input)
     {
         return (input > 0) ? input : alpha * input;
+    }
+
+    T Backward(T input)
+    {
+        return (input > 0) ? 1 : alpha;
     }
 
  private:
@@ -57,11 +72,15 @@ class ELU
     {
     }
 
-    T operator()(T input)
+    T Forward(T input)
     {
-        return (input > 0) ? input : alpha * (static_cast<T>(exp(input) - 1));
+        return (input > 0) ? input : alpha * (CpuArithmetic::Exponential(input) - 1);
     }
 
+    T Backward(T input)
+    {
+        return (input > 0) ? 1 : alpha*CpuArithmetic::Exponential(input);
+    }
  private:
     T alpha;
 };

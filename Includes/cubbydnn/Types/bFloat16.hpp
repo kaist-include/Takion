@@ -6,12 +6,24 @@
 #define CUBBYDNN_FLOAT16_HPP
 
 #include <cstdint>
+#include "TypeCast.hpp"
 
 namespace CubbyDNN
 {
 struct bFloat16
 {
     uint16_t m_value = 0;
+
+    bFloat16 operator+(bFloat16 rhs);
+
+    bFloat16 operator-(bFloat16 rhs);
+
+    bFloat16 operator*(bFloat16 rhs);
+
+    bFloat16 operator/(bFloat16 rhs);
+
+    float getFloat();
+
 };
 
 struct int8{
