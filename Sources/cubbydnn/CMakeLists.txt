@@ -27,7 +27,7 @@ file(GLOB_RECURSE sources
 
 # Build library
 add_library(${target}
-    ${sources})
+    ${sources} ../../Includes/cubbydnn/ExcecutionFunctions/Reticifiers.hpp ../../Includes/cubbydnn/ExcecutionFunctions/Sigmoids.hpp ../../Includes/cubbydnn/ExcecutionFunctions/SoftMax.hpp ../../Includes/cubbydnn/Arthimetics/Arthimetic.hpp Arthimetics/Arthimetic.cpp ../../Includes/cubbydnn/Types/bFloat16.hpp ../../Includes/cubbydnn/Types/Endian.hpp ../Types/bFloat16.cpp ../Types/TypeCast.cpp ../../Includes/cubbydnn/Types/TypeCast.hpp)
 
 # Project options
 set_target_properties(${target}

@@ -11,7 +11,7 @@
 #define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
 #endif
 
-namespace CubbnDNN
+namespace CubbyDNN
 {
 namespace ByteOrder
 {
