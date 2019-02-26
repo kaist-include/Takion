@@ -8,10 +8,6 @@ set(root_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../../Libraries
-)
-
-#Added by Justin
-include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/../../Includes
 )
 
@@ -27,7 +23,16 @@ file(GLOB_RECURSE sources
 
 # Build library
 add_library(${target}
-    ${sources} ../../Includes/cubbydnn/ExcecutionFunctions/Reticifiers.hpp ../../Includes/cubbydnn/ExcecutionFunctions/Sigmoids.hpp ../../Includes/cubbydnn/ExcecutionFunctions/SoftMax.hpp ../../Includes/cubbydnn/Arthimetics/Arthimetic.hpp Arthimetics/Arthimetic.cpp ../../Includes/cubbydnn/Types/bFloat16.hpp ../../Includes/cubbydnn/Types/Endian.hpp ../Types/bFloat16.cpp ../Types/TypeCast.cpp ../../Includes/cubbydnn/Types/TypeCast.hpp)
+    ${sources}
+        ../../Includes/cubbydnn/ExcecutionFunctions/Reticifiers.hpp
+        ../../Includes/cubbydnn/ExcecutionFunctions/Sigmoids.hpp
+        ../../Includes/cubbydnn/ExcecutionFunctions/SoftMax.hpp
+        ../../Includes/cubbydnn/Arthimetics/Arithmetic.hpp Arthimetics/Arithmetic.cpp
+        ../../Includes/cubbydnn/Types/bFloat16.hpp
+        ../../Includes/cubbydnn/Types/Endian.hpp
+        ../Types/bFloat16.cpp
+        ../Types/TypeCast.cpp
+        ../../Includes/cubbydnn/Types/TypeCast.hpp ../../Includes/cubbydnn/Types/Posit.hpp)
 
 # Project options
 set_target_properties(${target}

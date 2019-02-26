@@ -2,120 +2,127 @@
 // Created by jwkim98 on 19/02/19.
 //
 
-#include "../../../Includes/cubbydnn/Arthimetics/Arthimetic.hpp"
-
+#include "cubbydnn/Arthimetics/Arithmetic.hpp"
 namespace CubbyDNN
 {
 template <typename T>
-T CpuArthimatic::Exponential(T input)
+T CpuArithmetic::Exponential(T input)
 {
     return static_cast<T>(exp(input));
 }
 
 template <typename T>
-T CpuArthimatic::Sin(T input)
+T CpuArithmetic::Sin(T input)
 {
     return static_cast<T>(sin(input));
 }
 
 template <typename T>
-T CpuArthimatic::Cos(T input)
+T CpuArithmetic::Cos(T input)
 {
     return static_cast<T>(cos(input));
 }
 
 template <typename T>
-T CpuArthimatic::Tan(T input)
+T CpuArithmetic::Tan(T input)
 {
     return static_cast<T>(tan(input));
 }
 
 template <typename T>
-T CpuArthimatic::Tanh(T input)
+T CpuArithmetic::Tanh(T input)
 {
     return static_cast<T>(tanh(input));
 }
 
 template <typename T>
-T CpuArthimatic::Arctan(T input)
+T CpuArithmetic::Arctan(T input)
 {
     return static_cast<T>(atan(input));
 }
 
 template <typename T>
-T CpuArthimatic::Square(T input)
+T CpuArithmetic::Square(T input)
 {
     return static_cast<T>(pow(input, 2));
 }
 
-bFloat16 CpuArthimatic::Exponential(bFloat16 input)
+template <typename T>
+T CpuArithmetic::Log(T input)
 {
-    float convertedInput;
-    bFloat16ToFloat(&input, &convertedInput);
-    float ans = static_cast<float>(exp(convertedInput));
-    bFloat16 result;
-    FloatTobFloat16(&ans, &result);
-    return result;
+    return static_cast<T>(log(input));
 }
 
-bFloat16 CpuArthimatic::Sin(bFloat16 input)
+bFloat16 CpuArithmetic::Exponential(bFloat16 input)
 {
-    float convertedInput;
-    bFloat16ToFloat(&input, &convertedInput);
-    float ans = static_cast<float>(sin(convertedInput));
-    bFloat16 result;
-    FloatTobFloat16(&ans, &result);
-    return result;
+    float Input32 = input.getFloat();
+    float ans = expf32(Input32);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
 }
 
-bFloat16 CpuArthimatic::Cos(bFloat16 input)
+bFloat16 CpuArithmetic::Sin(bFloat16 input)
 {
-    float convertedInput;
-    bFloat16ToFloat(&input, &convertedInput);
-    float ans = static_cast<float>(cos(convertedInput));
-    bFloat16 result;
-    FloatTobFloat16(&ans, &result);
-    return result;
+    float Input32 = input.getFloat();
+    float ans = sinf32(Input32);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
 }
 
-bFloat16 CpuArthimatic::Tan(bFloat16 input)
+bFloat16 CpuArithmetic::Cos(bFloat16 input)
 {
-    float convertedInput;
-    bFloat16ToFloat(&input, &convertedInput);
-    float ans = static_cast<float>(tan(convertedInput));
-    bFloat16 result;
-    FloatTobFloat16(&ans, &result);
-    return result;
+    float Input32 = input.getFloat();
+    float ans = cosf32(Input32);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
 }
 
-bFloat16 CpuArthimatic::Tanh(bFloat16 input)
+bFloat16 CpuArithmetic::Tan(bFloat16 input)
 {
-    float convertedInput;
-    bFloat16ToFloat(&input, &convertedInput);
-    float ans = static_cast<float>(tanh(convertedInput));
-    bFloat16 result;
-    FloatTobFloat16(&ans, &result);
-    return result;
+    float Input32 = input.getFloat();
+    float ans = tanf32(Input32);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
 }
 
-bFloat16 CpuArthimatic::Arctan(bFloat16 input)
+bFloat16 CpuArithmetic::Tanh(bFloat16 input)
 {
-    float convertedInput;
-    bFloat16ToFloat(&input, &convertedInput);
-    float ans = static_cast<float>(atan(convertedInput));
-    bFloat16 result;
-    FloatTobFloat16(&ans, &result);
-    return result;
+    float Input32 = input.getFloat();
+    float ans = tanhf32(Input32);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
 }
 
-bFloat16 CpuArthimatic::Square(bFloat16 input)
+bFloat16 CpuArithmetic::Arctan(bFloat16 input)
 {
-    float convertedInput;
-    bFloat16ToFloat(&input, &convertedInput);
-    float ans = static_cast<float>(pow(convertedInput, 2));
-    bFloat16 result;
-    FloatTobFloat16(&ans, &result);
-    return result;
+    float Input32 = input.getFloat();
+    float ans = atanf32(Input32);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
+}
+
+bFloat16 CpuArithmetic::Square(bFloat16 input)
+{
+    float Input32 = input.getFloat();
+    float ans = powf32(Input32, 2);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
+}
+
+bFloat16 CpuArithmetic::Log(bFloat16 input)
+{
+    float Input32 = input.getFloat();
+    float ans = logf32(Input32);
+    uint16_t result;
+    TruncateFloatToBfloat16(&ans, &result);
+    return bFloat16{ result };
 }
 
 }  // namespace CubbyDNN

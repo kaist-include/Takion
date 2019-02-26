@@ -5,11 +5,11 @@
 #ifndef CUBBYDNN_ARTHIMETIC_HPP
 #define CUBBYDNN_ARTHIMETIC_HPP
 #include <cmath>
-#include "../Types/TypeCast.hpp"
+#include "../Types/Posit.hpp"
 #include "../Types/bFloat16.hpp"
 namespace CubbyDNN
 {
-class CpuArthimatic
+class CpuArithmetic
 {
     /**
      * These templates are for types fits into traditional
@@ -38,7 +38,7 @@ class CpuArthimatic
     static T Square(T input);
 
     template <typename T>
-    static T Sec(T input);
+    static T Log(T input);
 
     /**
      * Special implementations for bfloat16 types
@@ -57,6 +57,12 @@ class CpuArthimatic
     static bFloat16 Arctan(bFloat16 input);
 
     static bFloat16 Square(bFloat16 input);
+
+    static bFloat16 Log(bFloat16 input);
+
+    /**
+     * special implementations for posit types
+     */
 };
 }  // namespace CubbyDNN
 
