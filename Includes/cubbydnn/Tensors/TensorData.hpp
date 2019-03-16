@@ -10,20 +10,33 @@
 #include <cubbydnn/Tensors/TensorShape.hpp>
 
 #include <vector>
+#include <memory>
 
 namespace CubbyDNN
 {
 //!
 //! \brief TensorData class.
 //!
+
+template<typename T>
 class TensorData
 {
  public:
-    TensorData(std::vector<float> data, TensorShape shape_);
+    TensorData(std::vector<T> data, TensorShape shape_);
 
-    std::vector<float> dataVec;
+    std::vector<T> dataVec;
     TensorShape shape;
+
+    std::unique_ptr<T> ptr;
+    //TODO : Add cuda framework
+    std::unique_ptr<T> cuda_ptr;
+
     bool isMutable = true;
+
+    void mallocPtr(size_t byteSize){
+        ptr = new T(byteSize);
+    }
+
 };
 }  // namespace CubbyDNN
 
