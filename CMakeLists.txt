@@ -20,6 +20,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include_directories(Includes)
 include_directories(Libraries)
 include_directories(Libraries/doctest/doctest)
+include_directories(Libraries/blaze)
 
 # Compile options
 include(CMake/CompileOptions.cmake)
@@ -33,5 +34,5 @@ endif()
 set(CMAKE_MACOSX_RPATH ON)
 
 # Project modules
-add_subdirectory(Sources/CubbyDNN)
+add_subdirectory(Sources/cubbydnn)
 add_subdirectory(Tests/UnitTests)

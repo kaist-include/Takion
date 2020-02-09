@@ -1,3 +1,6 @@
 [submodule "Libraries/doctest"]
 	path = Libraries/doctest
 	url = https://github.com/onqtam/doctest
+[submodule "Libraries/blaze"]
+	path = Libraries/blaze
+	url = https://bitbucket.org/blaze-lib/blaze/src/master/
