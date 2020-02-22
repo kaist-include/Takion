@@ -53,8 +53,9 @@ target_link_libraries(${target}
         ${DEFAULT_LIBRARIES}
 
         INTERFACE
-        )
-
+        ${BLAZE_LIBRARY}
+)
+        
 # Install
 install(TARGETS ${target} DESTINATION lib)
 install(DIRECTORY ${header_dir} DESTINATION include)

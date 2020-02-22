@@ -29,7 +29,7 @@ namespace CubbyDNN{
                         if(!inplace) (*output)(i,j) = input(i,j);
                         mask(i,j) = true;
                     }else{
-                        if(inplace) (*output)(i,j) = 0;
+                        (*output)(i,j) = 0;
                     }
                 }
             }
