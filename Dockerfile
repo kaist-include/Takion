@@ -10,6 +10,12 @@ RUN apt-get update && apt-get install -y \
 COPY . /app
 
 WORKDIR /app/build
+
+RUN git clone https://bitbucket.org/blaze-lib/blaze/src/master/ && \
+    cd master && \
+    cp -r ./blaze /usr/local/include && \
+    cd ../
+
 RUN cmake .. && \
     make -j "$(nproc)" && \
     make install && \
