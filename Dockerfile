@@ -11,7 +11,8 @@ COPY . /app
 
 WORKDIR /app/build
 
-RUN git clone https://bitbucket.org/blaze-lib/blaze/src/master/ && \
+RUN apt-get install git && \
+    git clone https://bitbucket.org/blaze-lib/blaze/src/master/ && \
     cd master && \
     cp -r ./blaze /usr/local/include && \
     cd ../
