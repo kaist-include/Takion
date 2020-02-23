@@ -1,4 +1,4 @@
-#include <CubbyDNN/Layers/Activations.hpp>
+#include <CubbyDNN/Layers/Functions.hpp>
 #include "doctest.h"
 #include <blaze/Blaze.h>
 #include <cmath>
