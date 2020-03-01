@@ -51,7 +51,7 @@ class NN : public Layer<N>
         }
     }
 
-    T& forward(T& input, bool inplace)
+    T& forward(T& input, bool inplace) override
     {
         auto* output = &input;
         x = blaze::trans(input);
@@ -69,14 +69,14 @@ class NN : public Layer<N>
         return *output;
     }
 
-    T& backward(T& input, bool inplace)
+    T& backward(T& input, bool inplace) override
     {
         auto* output = &input;
         if (!inplace)
-            output = new T(out, 1);
+            output = new T(input.rows(), in);
         dW = x * input;
         dB = blaze::sum<blaze::columnwise>(input);
-        return *output = blaze::trans(input * weight.transpose());
+        return *output = input * blaze::trans(weight);
     }
 
     void apply_grad(SGD<N>& optimizer) override

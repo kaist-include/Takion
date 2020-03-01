@@ -20,7 +20,7 @@ class ReLU : public Layer<N>
  public:
     using Layer<N>::forward;
     using Layer<N>::backward;
-    T& forward(T& input, bool inplace)
+    T& forward(T& input, bool inplace) override
     {
         auto* output = &input;
         is_passed = true;
@@ -48,7 +48,7 @@ class ReLU : public Layer<N>
 
         return *output;
     }
-    T& backward(T& input, bool inplace)
+    T& backward(T& input, bool inplace) override
     {
         auto* output = &input;
         if (!inplace)
@@ -70,7 +70,7 @@ class Sigmoid : public Layer<N>
  public:
     using Layer<N>::forward;
     using Layer<N>::backward;
-    T& forward(T& input, bool inplace)
+    T& forward(T& input, bool inplace) override
     {
         auto* output = &input;
         if (!inplace)
@@ -78,7 +78,7 @@ class Sigmoid : public Layer<N>
         sigmoid_result = *output = 1 / (1 + blaze::exp(-input));
         return *output;
     }
-    T& backward(T& input, bool inplace)
+    T& backward(T& input, bool inplace) override
     {
         auto* output = &input;
         if (!inplace)
@@ -88,27 +88,75 @@ class Sigmoid : public Layer<N>
     }
 };
 
+template<NumberSystem N>
+class CrossEntropyWithSoftmax{
+    using MT = typename NumToMat<N>::type;
+    using NT = typename NumToType<N>::type;
+private:
+    MT grad;
+public:
+    void softmax_forward(MT& target){
+        for(size_t i=0;i<target.rows();++i){
+            NT max_val = target(i,0);
+            NT sum_val = 0;
+            for(size_t j=1;j<target.columns();++j){
+                if(max_val < target(i,j)) max_val = target(i,j);
+            }
+            for(size_t j=0;j<target.columns();++j){
+                target(i,j) = blaze::exp(target(i,j)-max_val);
+                sum_val += target(i,j);
+            }
+            for(size_t j=0;j<target.columns();++j){
+                (target(i,j)) /= sum_val;
+            }
+        }
+    }
+
+    NT forward(MT& input, MT& target){
+        NT batch_size = input.rows();
+        NT res = 0;
+        softmax_forward(input);
+        grad = input;
+        if(target.columns() == input.columns()){
+            res = blaze::sum(-blaze::log(input % target));
+            grad -= target;
+            grad /= batch_size;
+        }else {
+            for(size_t i=0;i<target.rows();++i){
+                res += -blaze::log(input(i,static_cast<size_t>(target(i, 0))));
+                grad(i,static_cast<size_t>(target(i, 0)))-=1;
+            }
+            grad /= batch_size;
+        }
+        return res;
+    }
+
+    MT backward(){
+        return grad;
+    }
+};
+
 template <NumberSystem N>
 class MSE
 {
     using MT = typename NumToMat<N>::type;
-    using T = typename NumToType<N>::type;
+    using NT = typename NumToType<N>::type;
 
  private:
-    MT subtraction;
-    T batch_size;
+    MT back_prop;
 
  public:
-    T forward(MT& input, MT& target)
+    NT forward(MT& input, MT& target)
     {
-        subtraction = input - target;
-        batch_size = input.rows();
-        T output = blaze::sum(blaze::pow(subtraction, 2)) / batch_size;
+        back_prop = input - target;
+        NT batch_size = input.rows();
+        NT output = blaze::sum(blaze::pow(back_prop, 2)) / batch_size;
+        back_prop *= 2 / batch_size;
         return output;
     }
     MT backward()
     {
-        return subtraction * 2 / batch_size;
+        return back_prop;
     }
 };
 }  // namespace CubbyDNN
