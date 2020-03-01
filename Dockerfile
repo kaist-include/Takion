@@ -4,6 +4,8 @@ LABEL maintainer "Chris Ohk <utilforever@gmail.com>"
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
+    ca-certificates \
+    git \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
@@ -11,8 +13,7 @@ COPY . /app
 
 WORKDIR /app/build
 
-RUN apt-get install git && \
-    git clone https://bitbucket.org/blaze-lib/blaze/src/master/ && \
+RUN git clone https://bitbucket.org/blaze-lib/blaze/src/master/ && \
     cd master && \
     cp -r ./blaze /usr/local/include && \
     cd ../
