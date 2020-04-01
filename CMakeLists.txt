@@ -16,18 +16,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 # Set enable output of compile commands during generation
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(BLAZE_LIBRARY)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    find_package(blaze)
-
-    if( blaze_FOUND )
-       add_library( blaze_target INTERFACE )
-       target_link_libraries( blaze_target INTERFACE blaze::blaze )
-       set(BLAZE_LIBRARY blaze_target)
-    endif()
-endif()
-
 # Includes
 include_directories(Includes)
 include_directories(Libraries)
@@ -43,6 +31,27 @@ endif()
 
 # Overrides
 set(CMAKE_MACOSX_RPATH ON)
+
+set(BLAZE_LIBRARY)
+
+include(CheckIncludeFileCXX)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    find_package(blaze)
+
+    if( blaze_FOUND )
+        add_library( blaze_target INTERFACE )
+        target_link_libraries( blaze_target INTERFACE blaze::blaze )
+        set(BLAZE_LIBRARY blaze_target)
+    endif()
+else()
+    check_include_file_cxx("blaze/Blaze.h" blaze_FOUND)
+    MESSAGE(STATUS ${CMAKE_REQUIRED_INCLUDES})
+endif()
+
+if(blaze_FOUND)
+    add_compile_definitions(BLAZE_FOUND)
+endif()
 
 # Project modules
 add_subdirectory(Sources/cubbydnn)
