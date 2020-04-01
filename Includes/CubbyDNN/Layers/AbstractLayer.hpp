@@ -22,7 +22,7 @@ class Layer
     }
     virtual T& forward(T& input, bool inplace) = 0;
     virtual T& backward(T& input, bool inplace) = 0;
-    virtual void apply_grad(SGD<N>&){}
+    virtual void apply_grad(Optimizer<N>&){}
 };
 }  // namespace CubbyDNN
 #endif  // CUBBYDNN_LAYER_HPP
