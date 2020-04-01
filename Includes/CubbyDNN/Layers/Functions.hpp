@@ -15,7 +15,6 @@ class ReLU : public Layer<N>
 
  private:
     blaze::CompressedMatrix<bool> mask;
-    bool is_passed = false;
 
  public:
     using Layer<N>::forward;
@@ -23,7 +22,6 @@ class ReLU : public Layer<N>
     T& forward(T& input, bool inplace) override
     {
         auto* output = &input;
-        is_passed = true;
         if (!inplace)
             output = new T(input.rows(), input.columns());
 
@@ -159,5 +157,141 @@ class MSE
         return back_prop;
     }
 };
+
+template <NumberSystem N>
+class ReLU6 : public Layer<N>{
+    using T = typename NumToMat<N>::type;
+
+private:
+    blaze::CompressedMatrix<bool> mask;
+
+public:
+    using Layer<N>::forward;
+    using Layer<N>::backward;
+    T& forward(T& input, bool inplace) override{
+        auto* output = &input;
+        if (!inplace)
+            output = new T(input.rows(), input.columns());
+
+        mask.resize(output->rows(), output->columns(), false);
+
+        for (size_t i = 0UL; i < output->rows(); ++i)
+        {
+            for (size_t j = 0UL; j < output->columns(); ++j)
+            {
+                if (input(i, j) > 0 && input(i,j) <=6)
+                {
+                    if (!inplace)
+                        (*output)(i, j) = input(i, j);
+                    mask(i, j) = true;
+                }
+                else if(input(i,j)>6)
+                {
+                    (*output)(i, j) = 6;
+                }else{
+                    (*output)(i, j) = 0;
+                }
+            }
+        }
+
+        return *output;
+    }
+    T& backward(T& input, bool inplace) override{
+        auto* output = &input;
+        if (!inplace)
+            output = new T(input.rows(), input.columns());
+        *output = mask % input;
+        return *output;
+    }
+};
+
+template <NumberSystem N>
+class LeakyReLU: public Layer<N>{
+    using T = typename NumToMat<N>::type;
+    using NT = typename NumToType<N>::type;
+private:
+    T mask;
+public:
+    NT leaky_val;
+
+    LeakyReLU(NT l_val=0.01): leaky_val(l_val) {}
+
+    using Layer<N>::forward;
+    using Layer<N>::backward;
+    T& forward(T& input, bool inplace) override{
+        auto* output = &input;
+        if (!inplace)
+            output = new T(input.rows(), input.columns());
+
+        mask.resize(output->rows(), output->columns());
+
+        for (size_t i = 0UL; i < output->rows(); ++i)
+        {
+            for (size_t j = 0UL; j < output->columns(); ++j)
+            {
+                if (input(i, j) > 0)
+                {
+                    if (!inplace)
+                        (*output)(i, j) = input(i, j);
+                    mask(i, j) = 1;
+                }
+                else{
+                    (*output)(i, j) *= leaky_val;
+                    mask(i, j) = leaky_val;
+                }
+            }
+        }
+
+        return *output;
+    }
+    T& backward(T& input, bool inplace) override{
+        auto* output = &input;
+        if (!inplace)
+            output = new T(input.rows(), input.columns());
+        *output = mask % input;
+        return *output;
+    }
+};
+
+template <NumberSystem N>
+class Tanh: public Layer<N>{
+    using T = typename NumToMat<N>::type;
+private:
+    T tan_val;
+public:
+    using Layer<N>::forward;
+    using Layer<N>::backward;
+    T& forward(T& input, bool inplace) override{
+        auto* output = &input;
+        if (!inplace)
+            output = new T(input.rows(), input.columns());
+        auto pos_exp = blaze::exp(input), neg_exp = blaze::exp(-input);
+
+        tan_val = (pos_exp - neg_exp) / (pos_exp + neg_exp);
+        return (*output) = tan_val;
+    }
+    T& backward(T& input, bool inplace) override{
+        auto* output = &input;
+        if (!inplace)
+            output = new T(input.rows(), input.columns());
+
+        return *output = (1 - blaze::pow(tan_val, 2)) % input;
+    }
+};
+
+template <NumberSystem N>
+class ELU : public Layer<N>{
+    using T = typename NumToMat<N>::type;
+private:
+    T tan_val;
+public:
+    using Layer<N>::forward;
+    using Layer<N>::backward;
+    T& forward(T& input, bool inplace) override{
+
+    }
+
+};
+
 }  // namespace CubbyDNN
 #endif  // CUBBYDNN_FUNCTIONS_HPP

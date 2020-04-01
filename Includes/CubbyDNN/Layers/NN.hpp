@@ -4,6 +4,7 @@
 #include <CubbyDNN/Layers/AbstractLayer.hpp>
 #include <CubbyDNN/NumberSystem.hpp>
 #include <CubbyDNN/Optimizers.hpp>
+#include <CubbyDNN/Initializers.hpp>
 #include <random>
 
 namespace CubbyDNN
@@ -23,7 +24,7 @@ class NN : public Layer<N>
  public:
     using Layer<N>::forward;
     using Layer<N>::backward;
-    NN(size_t in_dim, size_t out_dim, bool is_bias)
+    NN(size_t in_dim, size_t out_dim, bool is_bias, Initializer<N> init = Xavier<N>())
         : in(in_dim), out(out_dim), is_bias(is_bias)
     {
         double xavier_val = std::sqrt(2 / static_cast<double>(in + out));
@@ -79,7 +80,7 @@ class NN : public Layer<N>
         return *output = input * blaze::trans(weight);
     }
 
-    void apply_grad(SGD<N>& optimizer) override
+    void apply_grad(Optimizer<N>& optimizer) override
     {
         optimizer.update(weight, dW);
         if (is_bias)
