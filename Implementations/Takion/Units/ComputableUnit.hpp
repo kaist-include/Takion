@@ -18,11 +18,13 @@ ComputableUnit<T>::ComputableUnit(
     std::unordered_map<UnitId, Tensor<T>> backwardInputMap,
     Tensor<T> forwardOutput,
     std::unordered_map<UnitId, Tensor<T>> backwardOutputMap,
+    std::unordered_map<std::string, Tensor<T>> internalTensorMap,
     std::size_t batchSize)
     : ForwardInputMap(std::move(forwardInputMap)),
       BackwardInputMap(std::move(backwardInputMap)),
-      ForwardOutput(std::move(forwardOutput)),
+      ForwardOutput(forwardOutput),
       BackwardOutputMap(std::move(backwardOutputMap)),
+      InternalTensorMap(std::move(internalTensorMap)),
       BatchSize(batchSize),
       m_unitId(std::move(subjectUnitId))
 {
@@ -32,8 +34,9 @@ template <typename T>
 ComputableUnit<T>::ComputableUnit(ComputableUnit<T>&& computableUnit) noexcept
     : ForwardInputMap(std::move(computableUnit.ForwardInputMap)),
       BackwardInputMap(std::move(computableUnit.BackwardInputMap)),
-      ForwardOutput(std::move(computableUnit.ForwardOutput)),
+      ForwardOutput(computableUnit.ForwardOutput),
       BackwardOutputMap(std::move(computableUnit.BackwardOutputMap)),
+      InternalTensorMap(std::move(computableUnit.InternalTensorMap)),
       BatchSize(computableUnit.BatchSize),
       m_unitId(std::move(computableUnit.m_unitId))
 {
@@ -48,6 +51,8 @@ noexcept
     BackwardInputMap = std::move(computableUnit.BackwardInputMap);
     ForwardOutput = std::move(computableUnit.ForwardOutput);
     BackwardOutputMap = std::move(computableUnit.BackwardOutputMap);
+    InternalTensorMap = std::move(computableUnit.InternalTensorMap);
+    BatchSize = computableUnit.BatchSize;
     m_unitId = std::move(computableUnit.m_unitId);
     return *this;
 }
@@ -99,6 +104,34 @@ void ComputableUnit<T>::UpdateBackwardState()
     m_unitState.BackwardStateCount.fetch_add(1);
     for (auto& [unitId, tensor] : BackwardOutputMap)
         tensor.State.fetch_add(1);
+}
+
+template <typename T>
+void ComputableUnit<T>::ResetState()
+{
+    for (auto& [unitId, tensor] : ForwardInputMap)
+        tensor.State = 0;
+    for (auto& [unitId, tensor] : BackwardInputMap)
+        tensor.State = 0;
+    ForwardOutput.State = 0;
+    for (auto& [unitId, tensor] : BackwardOutputMap)
+        tensor.State = 0;
+
+    m_unitState.BackwardStateCount = 0;
+    m_unitState.ForwardStateCount = 0;
+}
+
+template <typename T>
+void ComputableUnit<T>::ChangeBatchSize(std::size_t batchSize)
+{
+    for (auto& [unitId, tensor] : ForwardInputMap)
+        tensor.ChangeBatchSize(batchSize);
+    for (auto& [unitId, tensor] : BackwardInputMap)
+        tensor.ChangeBatchSize(batchSize);
+    ForwardOutput.ChangeBatchSize(batchSize);
+    for (auto& [unitId, tensor] : BackwardOutputMap)
+        tensor.ChangeBatchSize(batchSize);
+    BatchSize = batchSize;
 }
 } // namespace Takion::Graph
 

@@ -45,8 +45,8 @@ public:
 
     void Optimize(Tensor<T>& tensor, Tensor<T>& update) override
     {
-        Compute::ScalarMul(update, m_epsilon, update);
-        Add(tensor, update, tensor);
+        Compute::ScalarMul(update, m_epsilon);
+        Compute::Add(tensor, update, tensor);
     }
 
 private:

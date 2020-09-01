@@ -20,6 +20,8 @@ template <typename T>
 class Tensor
 {
 public:
+    Tensor() = default;
+
     Tensor(Shape shape, Compute::Device device);
 
     Tensor(Shape shape, std::size_t batchSize, Compute::Device device);
@@ -30,10 +32,14 @@ public:
     ~Tensor();
 
     Tensor(const Tensor<T>& tensor);
-    Tensor(Tensor<T>&& tensor) noexcept;
+    Tensor(Tensor<T>&& tensor) noexcept = delete;
     /// move assignment operator
     Tensor<T>& operator=(const Tensor<T>& tensor);
-    Tensor<T>& operator=(Tensor<T>&& tensor) noexcept;
+    Tensor<T>& operator=(Tensor<T>&& tensor) noexcept = delete;
+
+    void SetData(const std::vector<T>& data);
+
+    [[nodiscard]] std::size_t NumMatrix() const;
 
     [[nodiscard]] Tensor<T> SubTensor(std::initializer_list<int> index);
 
@@ -44,11 +50,20 @@ public:
 
     static void CopyTensorData(const Tensor<T>& source, Tensor<T>& destination);
 
+    void ChangeBatchSize(std::size_t newBatchSize);
+
     T& At(std::size_t batchIdx, std::vector<std::size_t> index);
+
+    const T& At(std::size_t batchIdx, std::vector<std::size_t> index) const;
+
+    //! Access the data linearly considering paddings
+    T& At(std::size_t idx);
+
+    const T& At(std::size_t idx) const;
 
     [[nodiscard]] std::size_t ColumnElementSize() const
     {
-        return m_paddedColumnSize;
+        return m_columnElementSize;
     }
 
     [[nodiscard]] std::size_t ElementSize() const
@@ -56,18 +71,18 @@ public:
         return m_elementSize;
     }
 
-    [[nodiscard]] std::size_t BatchElementSize() const
+    [[nodiscard]] std::size_t TotalElementSize() const
     {
         return m_elementSize * BatchSize;
     }
 
     [[nodiscard]] std::size_t GetDataByteSize() const
     {
-        return BatchElementSize() * sizeof(T);
+        return TotalElementSize() * sizeof(T);
     }
 
-    /// Data vector which possesses actual data
-    Utils::Span<T> Data;
+    /// TensorData vector which possesses actual data
+    Util::Span<T> Data;
     /// Shape of this tensorData
     Shape TensorShape;
     Compute::Device Device;
@@ -76,8 +91,8 @@ public:
 
 private:
     std::size_t m_elementSize = 0;
-    std::size_t m_paddedColumnSize = 0;
-    std::atomic<bool> m_hasOwnership = false;
+    std::size_t m_columnElementSize = 0;
+    std::atomic_bool m_hasOwnership = false;
 
     std::size_t m_getElementSize() const;
 

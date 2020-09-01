@@ -9,8 +9,10 @@
 
 #include <iterator>
 #include <stdexcept>
+#include <cstring>
+#include <cstdlib>
 
-namespace Takion::Utils
+namespace Takion::Util
 {
 template <typename T>
 class Span
@@ -33,6 +35,29 @@ public:
         : m_base(&*begin),
           m_length(static_cast<std::size_t>(std::distance(begin, end)))
     {
+    }
+
+    Span(const Span& other) = default;
+
+    Span(Span&& other) noexcept = default;
+
+    Span& operator=(const Span& other) = default;
+
+    Span& operator=(Span&& other) noexcept = default;
+
+    const T* Base() const
+    {
+        return m_base;
+    }
+
+    T* Address(std::size_t idx)
+    {
+        return m_base + idx;
+    }
+
+    const T* Address(std::size_t idx) const
+    {
+        return m_base + idx;
     }
 
     T& operator[](std::size_t idx)
@@ -84,7 +109,15 @@ public:
 
     void Clear()
     {
-        delete[] m_base;
+        if (m_base != nullptr)
+        {
+#ifdef _MSC_VER
+            _aligned_free(m_base);
+#else
+            free(m_base);
+#endif
+        }
+        m_base = nullptr;
         m_length = 0;
     }
 

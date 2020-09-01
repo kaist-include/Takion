@@ -8,17 +8,22 @@
 #define TAKION_GRAPH_UNITMANAGER_DECL_HPP
 
 #include <Takion/Units/ComputableUnit.hpp>
-#include <Takion/Units/UnitMetadata.hpp>
+#include <Takion/FrontEnd/UnitMetaData.hpp>
 #include <Takion/Computations/Optimizers/Optimizer.hpp>
+#include <Takion/Utils/Loaders/Loader.hpp>
 #include <unordered_map>
 
-namespace Takion::Graph
+namespace Takion::Engine
 {
 template <typename T>
 class UnitManager
 {
 public:
-    UnitManager() = default;
+    UnitManager(std::size_t batchSize)
+        : m_batchSize(batchSize)
+    {
+    }
+
     virtual ~UnitManager() = default;
 
     UnitManager(const UnitManager<T>& unitManager) = delete;
@@ -26,23 +31,32 @@ public:
     UnitManager<T>& operator=(const UnitManager<T>& unitManager) = delete;
     UnitManager<T>& operator=(UnitManager<T>&& unitManager) noexcept;
 
-    void AppendUnit(UnitMetaData&& unitMetaData);
+    FrontEnd::UnitMetaData<T>& GetUnitMetaData(const UnitId& unitId);
 
-    Shape GetUnitOutputShape(const UnitId& unitId)
-    {
-        return m_unitMetaDataMap[unitId]->OutputShape();
-    }
+    void AppendUnit(FrontEnd::UnitMetaData<T>&& unitMetaData);
 
-    void Compile(const std::string& optimizerName,
-                 const Parameter& optimizerParameters);
+    void SetLoader(const UnitId& unitId,
+                   std::unique_ptr<Util::Loader<T>> loader);
 
-    virtual void Forward(std::size_t cycle);
+    Shape GetUnitOutputShape(const UnitId& unitId);
 
-    virtual void Backward(std::size_t cycle);
+    void Compile(const std::string& optimizerName, const Parameter& parameter);
+
+    virtual void Forward();
+
+    virtual void Backward();
 
     virtual void AsyncForward(std::size_t cycle);
 
     virtual void AsyncBackward(std::size_t cycle);
+
+    virtual void ResetState();
+
+    virtual void ChangeBatchSize(std::size_t batchSize);
+
+    [[nodiscard]] const Tensor<T>& GetOutput(UnitId unitId) const;
+
+    std::unique_ptr<Graph::ComputableUnit<T>>& GetUnit(const UnitId& unitId);
 
 private:
     [[nodiscard]] bool m_isForwardCopyReady(const UnitId& subjectUnitId) const;
@@ -51,16 +65,24 @@ private:
     void m_forwardCopy(const UnitId& subjectUnitId);
     //! Copies backward outputs of subject unit to backward inputs of destination units with direct connection
     void m_backwardCopy(const UnitId& subjectUnitId);
-    //! Creates dependencies between output units and input units
-    void m_connectUnits();
+
+    bool m_appendSource(const FrontEnd::UnitMetaData<T>& unitMetaData);
+    bool m_appendHidden(const FrontEnd::UnitMetaData<T>& unitMetaData,
+                        const std::string& optimizerName,
+                        const Parameter& parameter);
+    bool m_appendLoss(const FrontEnd::UnitMetaData<T>& unitMetaData);
+
 
     [[nodiscard]] std::unique_ptr<Compute::Optimizer<T>> m_makeOptimizer(
         const std::string& optimizerName,
-        const Parameter& parameters) const;
+        const Parameter& parameter) const;
 
-    std::unordered_map<UnitId, std::unique_ptr<UnitMetaData<T>>>
+    std::unordered_map<UnitId, FrontEnd::UnitMetaData<T>>
     m_unitMetaDataMap;
-    std::unordered_map<UnitId, std::unique_ptr<ComputableUnit<T>>> m_unitMap;
+    std::unordered_map<UnitId, std::unique_ptr<Graph::ComputableUnit<T>>>
+    m_unitMap;
+    std::unordered_map<UnitId, std::unique_ptr<Util::Loader<T>>> m_loaderMap;
+    std::size_t m_batchSize;
 };
 } // namespace Takion::Graph
 

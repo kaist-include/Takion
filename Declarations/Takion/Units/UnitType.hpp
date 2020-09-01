@@ -9,21 +9,26 @@
 
 #include <Takion/Utils/SharedPtr.hpp>
 #include <unordered_map>
+#include <string>
+#include <string_view>
 
 namespace Takion
 {
 enum class UnitBaseType
 {
-    Source,
+    Fetcher,
+    Constant,
     Hidden,
-    Sink,
-    Copy,
+    Activation,
+    Loss,
+    Undefined,
 };
 
 
 class UnitType
 {
 public:
+    UnitType() = default;
     UnitType(UnitBaseType type, std::string_view typeName);
     UnitType(UnitBaseType type, std::string_view name,
              SharedPtr<UnitType> baseUnit);
@@ -55,14 +60,23 @@ public:
     static bool IsBaseOf(const UnitType& baseUnit, const UnitType& derivedUnit);
 
     SharedPtr<UnitType> BaseUnit;
-    UnitBaseType BaseType;
+    UnitBaseType BaseType = UnitBaseType::Undefined;
 
 private:
-    std::string m_typeName;
+    std::string m_typeName = "UnknownType";
 };
 
 struct UnitId
 {
+    UnitId() = default;
+
+    UnitId(UnitType type, std::size_t id, std::string name)
+        : Type(std::move(type)),
+          Id(id),
+          UnitName(std::move(name))
+    {
+    }
+
     bool operator==(const UnitId& unitId) const
     {
         return Type == unitId.Type && Id == unitId.Id &&
@@ -74,9 +88,29 @@ struct UnitId
         return !(*this == unitId);
     }
 
+    friend bool operator<(const UnitId& lhs, const UnitId& rhs)
+    {
+        return lhs.Id < rhs.Id;
+    }
+
+    friend bool operator<=(const UnitId& lhs, const UnitId& rhs)
+    {
+        return !(rhs < lhs);
+    }
+
+    friend bool operator>(const UnitId& lhs, const UnitId& rhs)
+    {
+        return rhs < lhs;
+    }
+
+    friend bool operator>=(const UnitId& lhs, const UnitId& rhs)
+    {
+        return !(lhs < rhs);
+    }
+
     UnitType Type;
-    std::size_t Id;
-    std::string UnitName;
+    std::size_t Id = 0;
+    std::string UnitName = "Undefined";
 };
 
 //! UnitState
@@ -99,9 +133,9 @@ struct hash<Takion::UnitId>
     {
         const std::size_t h1 = std::hash<std::string>{}(s.UnitName);
         const std::size_t h2 = std::hash<std::size_t>{}(s.Id);
-        return h1 ^ (h2 << 1);  // or use boost::hash_combine
+        return h1 ^ (h2 << 1); // or use boost::hash_combine
     }
 };
-};  // namespace std
+}; // namespace std
 #endif
 //! AddCpu template specialization for UnitId hash
